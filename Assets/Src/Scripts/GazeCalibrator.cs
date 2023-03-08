@@ -12,20 +12,22 @@ public class GazeCalibrator : MonoBehaviour
     // Lifecycle methods
     private void Start()
     {
-        InvokeRepeating(nameof(RequestCalibrationIfNeeded), 2.0f, 20f);
+        InvokeRepeating(nameof(RequestCalibrationIfNeeded), 5f, 5f);
     }
 
 
     // Private methods
     private void RequestCalibrationIfNeeded()
     {
+        var gaze = VarjoEyeTracking.GetGaze();
+        if (gaze.status == VarjoEyeTracking.GazeStatus.Adjust) return;
+        
         _calibrationQuality = VarjoEyeTracking.GetGazeCalibrationQuality();
-        Debug.Log($"right {_calibrationQuality.right} left{_calibrationQuality.left}");
         var leftCalibrationValid = _calibrationQuality.left >= VarjoEyeTracking.GazeEyeCalibrationQuality.Medium;
         var rightCalibrationValid = _calibrationQuality.right >= VarjoEyeTracking.GazeEyeCalibrationQuality.Medium;
         if (leftCalibrationValid && rightCalibrationValid) return;
         
-        bool ok = VarjoEyeTracking.RequestGazeCalibration(VarjoEyeTracking.GazeCalibrationMode.Fast,
+        bool ok = VarjoEyeTracking.RequestGazeCalibration(VarjoEyeTracking.GazeCalibrationMode.OneDot,
             VarjoEyeTracking.HeadsetAlignmentGuidanceMode.AutoContinueOnAcceptableHeadsetPosition);
         if (!ok) RequestCalibrationIfNeeded();
     }
